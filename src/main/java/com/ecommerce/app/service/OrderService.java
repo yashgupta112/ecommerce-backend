@@ -40,7 +40,7 @@ public class OrderService {
         User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         if (!"CUSTOMER".equals(user.getRole())) {
-            throw new IllegalArgumentException("Sellers cannot place orders");
+            throw new IllegalArgumentException("Sellers/Admins cannot place orders");
         }
 
         List<Cart> cartItems = cartRepository.findByCustomer(user);

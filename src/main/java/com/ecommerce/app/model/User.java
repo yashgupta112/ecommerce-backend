@@ -18,11 +18,13 @@ public class User {
     private String password;
 
     @Column(nullable = false)
-    private String role; // "CUSTOMER" or "SELLER"
+    private String role; // "CUSTOMER" or "SELLER" or "ADMIN"
 
     private String email;
     private String phone;
     private String address;
+
+    private boolean active = true; // For suspension
 
     // Getters and Setters
     public Long getId() {
@@ -79,6 +81,14 @@ public class User {
 
     public void setAddress(String address) {
         this.address = address;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
     }
 
     // Override equals and hashCode for entity comparison
