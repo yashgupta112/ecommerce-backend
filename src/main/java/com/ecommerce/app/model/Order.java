@@ -13,16 +13,25 @@ public class Order {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "customer_id")
+    @JoinColumn(name = "customer_id", nullable = false)
     private User customer;
 
+    @Column(nullable = false)
     private Date orderDate;
+
+    @Column(nullable = false)
+    private String status;
+
+    @Column(nullable = false)
     private String shippingAddress;
+
+    @Column(nullable = false)
     private String phone;
+
+    @Column(nullable = false)
     private Double totalAmount;
 
-    @OneToMany(cascade = CascadeType.ALL)
-    @JoinColumn(name = "order_id")
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     private List<OrderItem> orderItems;
 
     // Getters and Setters
@@ -48,6 +57,14 @@ public class Order {
 
     public void setOrderDate(Date orderDate) {
         this.orderDate = orderDate;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     public String getShippingAddress() {

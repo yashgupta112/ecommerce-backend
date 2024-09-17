@@ -1,11 +1,15 @@
 package com.ecommerce.app.controller;
 
+import com.ecommerce.app.exception.ResourceNotFoundException;
 import com.ecommerce.app.model.*;
 import com.ecommerce.app.service.CustomerService;
+import com.ecommerce.app.service.UserService;
+import com.ecommerce.app.security.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -15,53 +19,63 @@ public class CustomerController {
     @Autowired
     private CustomerService customerService;
 
-    // View products by category
-    @GetMapping("/products/{category}")
-    public ResponseEntity<List<Product>> viewProducts(@PathVariable String category) {
-        List<Product> products = customerService.viewProducts(category);
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private JwtUtil jwtUtil;
+
+    @GetMapping("/products")
+    public ResponseEntity<List<Product>> getAllProducts() {
+        List<Product> products = customerService.getAllProducts();
         return ResponseEntity.ok(products);
     }
 
-    // Add product to cart
-    @PostMapping("/cart/add")
-    public ResponseEntity<Cart> addToCart(@RequestParam Long customerId, @RequestParam Long productId, @RequestParam int quantity) {
-        User customer = new User();  // Fetch customer by ID from UserService (assumed)
-        customer.setId(customerId);
-        Cart cart = customerService.addToCart(customer, productId, quantity);
-        return ResponseEntity.ok(cart);
+    @GetMapping("/products/category/{category}")
+    public ResponseEntity<List<Product>> getProductsByCategory(@PathVariable String category) {
+        List<Product> products = customerService.getProductsByCategory(category);
+        return ResponseEntity.ok(products);
     }
 
-    // View cart items
     @GetMapping("/cart")
-    public ResponseEntity<List<Cart>> viewCart(@RequestParam Long customerId) {
-        User customer = new User();  // Fetch customer by ID
-        customer.setId(customerId);
-        List<Cart> cartItems = customerService.viewCart(customer);
+    public ResponseEntity<List<Cart>> getCartItems(Principal principal) {
+        User user = userService.findByUsername(principal.getName()).orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        List<Cart> cartItems = customerService.getCartItems(user);
         return ResponseEntity.ok(cartItems);
     }
 
-    // Remove item from cart
-    @DeleteMapping("/cart/remove/{cartId}")
-    public ResponseEntity<Void> removeFromCart(@PathVariable Long cartId) {
-        customerService.removeFromCart(cartId);
+    @PostMapping("/cart")
+    public ResponseEntity<Cart> addToCart(Principal principal, @RequestParam Long productId, @RequestParam Integer quantity) {
+        User user = userService.findByUsername(principal.getName()).orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        Cart cartItem = customerService.addToCart(user.getId(), productId, quantity);
+        return ResponseEntity.ok(cartItem);
+    }
+
+    @PutMapping("/cart/{cartItemId}")
+    public ResponseEntity<Cart> updateCartItem(Principal principal, @PathVariable Long cartItemId, @RequestParam Integer quantity) {
+        User user = userService.findByUsername(principal.getName()).orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        Cart updatedCartItem = customerService.updateCartItem(cartItemId, quantity);
+        return ResponseEntity.ok(updatedCartItem);
+    }
+
+    @DeleteMapping("/cart/{cartItemId}")
+    public ResponseEntity<Void> removeFromCart(Principal principal, @PathVariable Long cartItemId) {
+        User user = userService.findByUsername(principal.getName()).orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        customerService.removeFromCart(cartItemId);
         return ResponseEntity.ok().build();
     }
 
-    // Place an order
-    @PostMapping("/order/place")
-    public ResponseEntity<Order> placeOrder(@RequestParam Long customerId, @RequestParam String shippingAddress, @RequestParam String phone) {
-        User customer = new User();  // Fetch customer by ID
-        customer.setId(customerId);
-        Order order = customerService.placeOrder(customer, shippingAddress, phone);
-        return ResponseEntity.ok(order);
+    @GetMapping("/orders")
+    public ResponseEntity<List<Order>> getOrders(Principal principal) {
+        User user = userService.findByUsername(principal.getName()).orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        List<Order> orders = customerService.getOrders(user);
+        return ResponseEntity.ok(orders);
     }
 
-    // View order history
-    @GetMapping("/orders")
-    public ResponseEntity<List<Order>> viewOrderHistory(@RequestParam Long customerId) {
-        User customer = new User();  // Fetch customer by ID
-        customer.setId(customerId);
-        List<Order> orders = customerService.viewOrderHistory(customer);
-        return ResponseEntity.ok(orders);
+    @PostMapping("/orders")
+    public ResponseEntity<Order> placeOrder(Principal principal, @RequestParam String shippingAddress, @RequestParam String phone) {
+        User user = userService.findByUsername(principal.getName()).orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        Order order = customerService.placeOrder(user.getId(), shippingAddress, phone);
+        return ResponseEntity.ok(order);
     }
 }

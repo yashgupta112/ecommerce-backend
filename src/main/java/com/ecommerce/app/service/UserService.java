@@ -1,5 +1,7 @@
 package com.ecommerce.app.service;
 
+import com.ecommerce.app.exception.InvalidCredentialsException;
+import com.ecommerce.app.exception.ResourceNotFoundException;
 import com.ecommerce.app.model.User;
 import com.ecommerce.app.repository.UserRepository;
 import com.ecommerce.app.security.JwtUtil;
@@ -45,8 +47,12 @@ public class UserService implements UserDetailsService {
         return userRepository.findByUsername(username);
     }
 
+    public Optional<User> findById(Long userId) {
+        return userRepository.findById(userId);
+    }
+
     public User updateUser(Long id, User updatedUser) {
-        User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
+        User user = userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User not found"));
         user.setEmail(updatedUser.getEmail());
         user.setPhone(updatedUser.getPhone());
         user.setAddress(updatedUser.getAddress());
@@ -56,7 +62,7 @@ public class UserService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         return new org.springframework.security.core.userdetails.User(user.getUsername(), user.getPassword(),
                 new ArrayList<>());
     }
@@ -69,9 +75,7 @@ public class UserService implements UserDetailsService {
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
             return jwtUtil.generateToken(userDetails);
         } catch (Exception e) {
-            System.err.println("test");
-            System.err.println(e);
-            throw new Exception("Incorrect username or password", e);
+            throw new InvalidCredentialsException("Incorrect username or password");
         }
     }
 }
