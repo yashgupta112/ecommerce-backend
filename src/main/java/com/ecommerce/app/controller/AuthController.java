@@ -1,13 +1,13 @@
 package com.ecommerce.app.controller;
 
+import com.ecommerce.app.exception.ResourceNotFoundException;
 import com.ecommerce.app.model.JwtRequest;
 import com.ecommerce.app.model.JwtResponse;
+import com.ecommerce.app.model.User;
+import com.ecommerce.app.service.UserService;
 import com.ecommerce.app.security.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -15,27 +15,35 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     @Autowired
-    private AuthenticationManager authenticationManager;
+    private UserService userService;
 
     @Autowired
     private JwtUtil jwtUtil;
 
-    @Autowired
-    private UserDetailsService userDetailsService;
+    @PostMapping("/register")
+    public ResponseEntity<User> registerUser(@RequestBody User user) {
+        User registeredUser = userService.registerUser(user);
+        return ResponseEntity.ok(registeredUser);
+    }
 
     @PostMapping("/login")
-    public JwtResponse login(@RequestBody JwtRequest jwtRequest) throws Exception {
-        try {
-            authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(jwtRequest.getUsername(), jwtRequest.getPassword())
-            );
-        } catch (Exception e) {
-            throw new Exception("Invalid username or password");
-        }
+    public ResponseEntity<JwtResponse> createAuthenticationToken(@RequestBody JwtRequest authenticationRequest) throws Exception {
+        String token = userService.loginUser(authenticationRequest.getUsername(), authenticationRequest.getPassword());
+        return ResponseEntity.ok(new JwtResponse(token));
+    }
 
-        UserDetails userDetails = userDetailsService.loadUserByUsername(jwtRequest.getUsername());
-        String token = jwtUtil.generateToken(userDetails);
+    @GetMapping("/user")
+    public ResponseEntity<User> getUserDetails(@RequestHeader("Authorization") String token) {
+        String username = jwtUtil.extractUsername(token.substring(7));
+        User user = userService.findByUsername(username).orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        return ResponseEntity.ok(user);
+    }
 
-        return new JwtResponse(token);
+    @PutMapping("/user/update")
+    public ResponseEntity<User> updateUser(@RequestHeader("Authorization") String token, @RequestBody User updatedUser) {
+        String username = jwtUtil.extractUsername(token.substring(7));
+        User user = userService.findByUsername(username).orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        User updated = userService.updateUser(user.getId(), updatedUser);
+        return ResponseEntity.ok(updated);
     }
 }

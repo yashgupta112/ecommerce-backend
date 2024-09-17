@@ -36,6 +36,9 @@ public class SecurityConfig {
                     try {
                         requests
                         .requestMatchers("/api/users/register", "/api/users/authenticate").permitAll()
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/seller/**").hasRole("SELLER")
+                        .requestMatchers("/api/customer/**").hasRole("CUSTOMER")
                         .anyRequest().authenticated()
                         .and()
                         .sessionManagement(management -> management.sessionCreationPolicy(SessionCreationPolicy.STATELESS));

@@ -73,7 +73,8 @@ public class UserService implements UserDetailsService {
                     new UsernamePasswordAuthenticationToken(username, password)
             );
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-            return jwtUtil.generateToken(userDetails);
+            User user = userRepository.findByUsername(username).orElseThrow(() -> new ResourceNotFoundException("User not found"));
+            return jwtUtil.generateToken(userDetails, user.getRole());
         } catch (Exception e) {
             throw new InvalidCredentialsException("Incorrect username or password");
         }
