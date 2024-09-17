@@ -25,6 +25,10 @@ public class Product {
     @Column(nullable = false)
     private Integer stock;
 
+    @ManyToOne
+    @JoinColumn(name = "seller_id", nullable = false)
+    private User seller;
+
     // Getters and Setters
     public Long getId() {
         return id;
@@ -72,5 +76,13 @@ public class Product {
 
     public void setStock(Integer stock) {
         this.stock = stock;
+    }
+
+    public User getSeller() {
+        return seller;
+    }
+
+    public void setSeller(User seller) {
+        this.seller = seller;
     }
 }

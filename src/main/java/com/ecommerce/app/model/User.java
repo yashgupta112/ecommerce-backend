@@ -11,24 +11,18 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false, unique = true)
     private String username;
+
+    @Column(nullable = false)
     private String password;
-    private String role; // CUSTOMER, SELLER, ADMIN
+
+    @Column(nullable = false)
+    private String role; // "CUSTOMER" or "SELLER"
+
     private String email;
-    private String address;
     private String phone;
-
-    // Constructors
-    public User() {}
-
-    public User(String username, String password, String role, String email, String address, String phone) {
-        this.username = username;
-        this.password = password;
-        this.role = role;
-        this.email = email;
-        this.address = address;
-        this.phone = phone;
-    }
+    private String address;
 
     // Getters and Setters
     public Long getId() {
@@ -71,20 +65,20 @@ public class User {
         this.email = email;
     }
 
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
     public String getPhone() {
         return phone;
     }
 
     public void setPhone(String phone) {
         this.phone = phone;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
     }
 
     // Override equals and hashCode for entity comparison
@@ -100,4 +94,5 @@ public class User {
     public int hashCode() {
         return Objects.hash(id);
     }
+
 }

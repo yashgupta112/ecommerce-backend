@@ -4,7 +4,6 @@ import com.ecommerce.app.exception.ResourceNotFoundException;
 import com.ecommerce.app.model.*;
 import com.ecommerce.app.service.CustomerService;
 import com.ecommerce.app.service.UserService;
-import com.ecommerce.app.security.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,9 +20,6 @@ public class CustomerController {
 
     @Autowired
     private UserService userService;
-
-    @Autowired
-    private JwtUtil jwtUtil;
 
     @GetMapping("/products")
     public ResponseEntity<List<Product>> getAllProducts() {
