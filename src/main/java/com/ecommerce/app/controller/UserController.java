@@ -26,11 +26,15 @@ public class UserController {
 
     @PostMapping("/authenticate")
     public ResponseEntity<?> createAuthenticationToken(@RequestBody JwtRequest authenticationRequest) throws Exception {
+        System.out.println("authenticationRequest: ");
+        System.out.println(authenticationRequest.toString());
         String token = userService.loginUser(authenticationRequest.getUsername(), authenticationRequest.getPassword());
+        System.out.println("token: ");
+        System.out.println(token);
         return ResponseEntity.ok(new JwtResponse(token));
     }
 
-    @GetMapping("/details")
+    @GetMapping("/profile")
     public ResponseEntity<User> getUserDetails(Principal principal) {
         Optional<User> user = userService.findByUsername(principal.getName());
         return user.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.badRequest().build());

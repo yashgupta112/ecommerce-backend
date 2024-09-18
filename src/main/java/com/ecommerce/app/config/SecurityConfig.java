@@ -31,17 +31,19 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+                .cors()
+                .and()
                 .csrf(csrf -> csrf.disable())
                 .authorizeRequests(requests -> {
                     try {
                         requests
-                        .requestMatchers("/api/users/register", "/api/users/authenticate").permitAll()
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/api/seller/**").hasRole("SELLER")
-                        .requestMatchers("/api/customer/**").hasRole("CUSTOMER")
-                        .anyRequest().authenticated()
-                        .and()
-                        .sessionManagement(management -> management.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+                                .requestMatchers("/api/users/register", "/api/users/authenticate").permitAll()
+                                .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                                .requestMatchers("/api/seller/**").hasRole("SELLER")
+                                .requestMatchers("/api/customer/**").hasRole("CUSTOMER")
+                                .anyRequest().authenticated()
+                                .and()
+                                .sessionManagement(management -> management.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
                     } catch (Exception e) {
                         // TODO Auto-generated catch block
                         e.printStackTrace();
