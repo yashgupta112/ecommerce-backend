@@ -23,6 +23,16 @@ public class SellerService {
         return productRepository.findBySeller(seller);
     }
 
+    public Product getProductById(Long sellerId, Long productId) {
+        User seller = userRepository.findById(sellerId).orElseThrow(() -> new ResourceNotFoundException("Seller not found"));
+        Product product = productRepository.findById(productId).orElseThrow(() -> new ResourceNotFoundException("Product not found"));
+
+        if (!product.getSeller().getId().equals(seller.getId())) {
+            throw new IllegalArgumentException("Product does not belong to the seller");
+        }
+        return product;
+    }
+
     public Product addProduct(Long sellerId, Product product) {
         User seller = userRepository.findById(sellerId).orElseThrow(() -> new ResourceNotFoundException("Seller not found"));
         product.setSeller(seller);

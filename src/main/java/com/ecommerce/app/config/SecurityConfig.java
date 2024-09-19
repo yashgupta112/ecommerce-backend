@@ -27,7 +27,7 @@ public class SecurityConfig {
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
 
-    @SuppressWarnings("deprecation")
+    @SuppressWarnings({ "deprecation", "removal" })
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -36,11 +36,14 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeRequests(requests -> {
                     try {
+                        System.err.println("requests");
+                        System.err.println(requests);
                         requests
-                                .requestMatchers("/api/users/register", "/api/users/authenticate").permitAll()
-                                .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                                .requestMatchers("/api/seller/**").hasRole("SELLER")
-                                .requestMatchers("/api/customer/**").hasRole("CUSTOMER")
+                                .requestMatchers("/api/auth/*").permitAll()
+                                .requestMatchers("/api/users/**").hasAnyAuthority("ADMIN", "SELLER", "CUSTOMER")
+                                .requestMatchers("/api/admin/**").hasAnyAuthority("ADMIN")
+                                .requestMatchers("/api/seller/**").hasAnyAuthority("SELLER")
+                                .requestMatchers("/api/customer/**").hasAnyAuthority("CUSTOMER")
                                 .anyRequest().authenticated()
                                 .and()
                                 .sessionManagement(management -> management.sessionCreationPolicy(SessionCreationPolicy.STATELESS));

@@ -17,6 +17,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/customer")
+@PreAuthorize("hasRole('CUSTOMER')")
 public class CustomerController {
 
     @Autowired
@@ -25,21 +26,18 @@ public class CustomerController {
     @Autowired
     private UserService userService;
 
-    @PreAuthorize("hasRole('CUSTOMER')")
     @GetMapping("/products")
     public ResponseEntity<List<Product>> getAllProducts() {
         List<Product> products = customerService.getAllProducts();
         return ResponseEntity.ok(products);
     }
 
-    @PreAuthorize("hasRole('CUSTOMER')")
     @GetMapping("/products/category/{category}")
     public ResponseEntity<List<Product>> getProductsByCategory(@PathVariable String category) {
         List<Product> products = customerService.getProductsByCategory(category);
         return ResponseEntity.ok(products);
     }
 
-    @PreAuthorize("hasRole('CUSTOMER')")
     @GetMapping("/cart")
     public ResponseEntity<List<Cart>> getCartItems(Principal principal) {
         User user = userService.findByUsername(principal.getName()).orElseThrow(() -> new ResourceNotFoundException("User not found"));
@@ -47,7 +45,6 @@ public class CustomerController {
         return ResponseEntity.ok(cartItems);
     }
 
-    @PreAuthorize("hasRole('CUSTOMER')")
     @PostMapping("/cart")
     public ResponseEntity<Cart> addToCart(Principal principal, @RequestParam Long productId, @RequestParam Integer quantity) {
         User user = userService.findByUsername(principal.getName()).orElseThrow(() -> new ResourceNotFoundException("User not found"));
@@ -55,23 +52,20 @@ public class CustomerController {
         return ResponseEntity.ok(cartItem);
     }
 
-    @PreAuthorize("hasRole('CUSTOMER')")
     @PutMapping("/cart/{cartItemId}")
     public ResponseEntity<Cart> updateCartItem(Principal principal, @PathVariable Long cartItemId, @RequestParam Integer quantity) {
-        User user = userService.findByUsername(principal.getName()).orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        userService.findByUsername(principal.getName()).orElseThrow(() -> new ResourceNotFoundException("User not found"));
         Cart updatedCartItem = customerService.updateCartItem(cartItemId, quantity);
         return ResponseEntity.ok(updatedCartItem);
     }
 
-    @PreAuthorize("hasRole('CUSTOMER')")
     @DeleteMapping("/cart/{cartItemId}")
     public ResponseEntity<Void> removeFromCart(Principal principal, @PathVariable Long cartItemId) {
-        User user = userService.findByUsername(principal.getName()).orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        userService.findByUsername(principal.getName()).orElseThrow(() -> new ResourceNotFoundException("User not found"));
         customerService.removeFromCart(cartItemId);
         return ResponseEntity.ok().build();
     }
 
-    @PreAuthorize("hasRole('CUSTOMER')")
     @GetMapping("/orders")
     public ResponseEntity<List<Order>> getOrders(Principal principal) {
         User user = userService.findByUsername(principal.getName()).orElseThrow(() -> new ResourceNotFoundException("User not found"));
@@ -79,11 +73,10 @@ public class CustomerController {
         return ResponseEntity.ok(orders);
     }
 
-    @PreAuthorize("hasRole('CUSTOMER')")
     @PostMapping("/orders")
-    public ResponseEntity<Order> placeOrder(Principal principal, @RequestParam String shippingAddress, @RequestParam String phone) {
+    public ResponseEntity<Order> placeOrder(Principal principal, @RequestBody Order orderDetails) {
         User user = userService.findByUsername(principal.getName()).orElseThrow(() -> new ResourceNotFoundException("User not found"));
-        Order order = customerService.placeOrder(user.getId(), shippingAddress, phone);
+        Order order = customerService.placeOrder(user.getId(), orderDetails.getShippingAddress(), orderDetails.getPhone());
         return ResponseEntity.ok(order);
     }
 }

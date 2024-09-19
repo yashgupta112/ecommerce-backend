@@ -1,7 +1,5 @@
 package com.ecommerce.app.controller;
 
-import com.ecommerce.app.model.JwtRequest;
-import com.ecommerce.app.model.JwtResponse;
 import com.ecommerce.app.model.User;
 import com.ecommerce.app.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,21 +16,6 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    @PostMapping("/register")
-    public ResponseEntity<User> registerUser(@RequestBody User user) {
-        User registeredUser = userService.registerUser(user);
-        return ResponseEntity.ok(registeredUser);
-    }
-
-    @PostMapping("/authenticate")
-    public ResponseEntity<?> createAuthenticationToken(@RequestBody JwtRequest authenticationRequest) throws Exception {
-        System.out.println("authenticationRequest: ");
-        System.out.println(authenticationRequest.toString());
-        String token = userService.loginUser(authenticationRequest.getUsername(), authenticationRequest.getPassword());
-        System.out.println("token: ");
-        System.out.println(token);
-        return ResponseEntity.ok(new JwtResponse(token));
-    }
 
     @GetMapping("/profile")
     public ResponseEntity<User> getUserDetails(Principal principal) {

@@ -15,6 +15,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/seller")
+@PreAuthorize("hasRole('SELLER')")
 public class SellerController {
 
     @Autowired
@@ -23,7 +24,7 @@ public class SellerController {
     @Autowired
     private UserService userService;
 
-    @PreAuthorize("hasRole('SELLER')")
+    
     @GetMapping("/products")
     public ResponseEntity<List<Product>> getAllProducts(Principal principal) {
         User seller = userService.findByUsername(principal.getName()).orElseThrow(() -> new ResourceNotFoundException("Seller not found"));
@@ -31,7 +32,7 @@ public class SellerController {
         return ResponseEntity.ok(products);
     }
 
-    @PreAuthorize("hasRole('SELLER')")
+    
     @PostMapping("/products")
     public ResponseEntity<Product> addProduct(Principal principal, @RequestBody Product product) {
         User seller = userService.findByUsername(principal.getName()).orElseThrow(() -> new ResourceNotFoundException("Seller not found"));
@@ -39,7 +40,16 @@ public class SellerController {
         return ResponseEntity.ok(createdProduct);
     }
 
-    @PreAuthorize("hasRole('SELLER')")
+    
+    @GetMapping("/products/{productId}")
+    public ResponseEntity<Product> getProduct(Principal principal, @PathVariable Long productId) {
+        User seller = userService.findByUsername(principal.getName()).orElseThrow(() -> new ResourceNotFoundException("Seller not found"));
+        Product product = sellerService.getProductById(seller.getId(), productId);
+        return ResponseEntity.ok(product);
+    }
+    
+
+    
     @PutMapping("/products/{productId}")
     public ResponseEntity<Product> updateProduct(Principal principal, @PathVariable Long productId, @RequestBody Product product) {
         User seller = userService.findByUsername(principal.getName()).orElseThrow(() -> new ResourceNotFoundException("Seller not found"));
@@ -47,7 +57,7 @@ public class SellerController {
         return ResponseEntity.ok(updatedProduct);
     }
 
-    @PreAuthorize("hasRole('SELLER')")
+    
     @DeleteMapping("/products/{productId}")
     public ResponseEntity<Void> deleteProduct(Principal principal, @PathVariable Long productId) {
         User seller = userService.findByUsername(principal.getName()).orElseThrow(() -> new ResourceNotFoundException("Seller not found"));
